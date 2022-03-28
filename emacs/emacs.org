@@ -1,0 +1,1254 @@
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
+#+Author: Que Fanning
+#+Title: Emacs Literate Configuration
+<<<<<<< HEAD
+#+LAST_MODIFIED: [2022-03-25 Fri 16:41]
+=======
+#+LAST_MODIFIED: [2022-03-20 Sun 19:36]
+>>>>>>> origin/main
+
+* Package Management
+** Warning Message
+#+begin_src emacs-lisp
+;;;; This file is generated automatically from emacs.org, make any changes there.
+#+end_src
+
+** Disable Package.el
+Disables the default Emacs package manager.
+#+begin_src emacs-lisp
+(setq package-enable-at-startup nil)
+#+end_src
+
+** Straight.el
+Checks if Straight.el is present if it is not found install it from Github.
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(setq straight-repository-branch "develop")
+#+end_src
+
+** Use-package
+Configures use-package installation macro
+#+begin_src emacs-lisp
+  (straight-use-package
+   '(use-package
+      :type git
+      :host github
+      :repo "jwiegley/use-package"))
+
+  (eval-when-compile
+    (add-to-list 'load-path "~/.emacs.d/straight/build")
+    (require 'use-package))
+
+  (setq straight-use-package-by-default t) ;Adds the straight argument to all use-package statements.
+  (setq use-package-always-ensure t) ;Adds the require argument to all use-package statements.
+#+end_src
+
+*  Global Settings
+
+** User Interface
+
+*** Mode Line
+**** General
+#+begin_src emacs-lisp
+(setq display-time-day-and-date t
+      display-time-24hr-format t
+      display-time-format "%Y-%m-%d %H:%M")
+
+(display-time-mode 1)
+(column-number-mode 1) ; Adds column number to modeline
+#+end_src
+**** Doom Modeline
+Adds the Doom Emacs Style Modeline.
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
+#+end_src
+
+*** Frame Appearance
+
+**** General
+#+begin_src emacs-lisp
+(menu-bar-mode -1) ; Removes menue bar from UI.
+(tool-bar-mode -1) ; Removes toolbar from UI.
+(scroll-bar-mode -1) ; Removes scrollbars from UI.
+(set-fringe-mode 5) ; Adds spacing from edge of frame.
+(global-hl-line-mode 1) ; Highlights line currently under point.
+(setq org-startup-with-inline-images t) ; Displays org-mode image previews.
+#+end_src
+
+**** Frame Start Up Size
+Configures Emacs to start in full screen mode and maximized.
+#+begin_src emacs-lisp
+;(custom-set-variables
+; '(initial-frame-alist (quote ((fullscreen . maximized)))))
+;(add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
+#+end_src
+
+**** Fonts
+***** System Fonts
+#+begin_src emacs-lisp
+(defvar technonomicon/default-font-size 150)
+
+(set-face-attribute 'default nil
+                    :font "Fira Code"
+                    :weight 'semibold
+                    :height 180)
+
+(set-face-attribute 'fixed-pitch nil
+                    :font "Fira Code"
+                    :weight 'semibold
+                    :height 180)
+
+(set-face-attribute 'variable-pitch nil
+                    :font "Fira Sans"
+                    :weight 'light
+                    :height 220)
+#+end_src
+
+***** Default to UTF-8 Character Encoding
+#+begin_src emacs-lisp
+(prefer-coding-system 'utf-8)
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+#+end_src
+
+***** All the Icons
+Package that adds system and other specialty icons.
+Needs to have =M-x all-the-icons= run on first time start up.
+#+begin_src emacs-lisp
+(use-package all-the-icons)
+#+end_src
+
+***** Emojify
+Adds emoji support to text buffers.
+#+begin_src emacs-lisp
+(use-package emojify)
+#+end_src
+
+***** Ligature
+Adds ligature support to text buffers.
+#+begin_src emacs-lisp
+  (use-package ligature
+    :straight (ligature :type git :host github :repo "mickeynp/ligature.el")
+    :config
+    ;; Enable the "www" ligature in every possible major mode
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable traditional ligature support in eww-mode, if the
+    ;; `variable-pitch' face supports it
+    (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+    ;; Enable all Cascadia Code ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                         ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                         "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                         "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                         "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                         "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                         "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                         "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                         ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                         "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                         "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                         "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                         "\\\\" "://"))
+    (ligature-set-ligatures 'org-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                         ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                         "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                         "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                         "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                         "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                         "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                         "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                         ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                         "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                         "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                         "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                         "\\\\" "://"))
+    ;; Enables ligature checks globally in all buffers. You can also do it
+    ;; per mode with `ligature-mode'.
+    (global-ligature-mode t))
+#+end_src
+
+**** Doom Themes
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :init (load-theme 'doom-city-lights t))
+#+end_src
+
+*** Line Numbers
+#+begin_src emacs-lisp
+(global-display-line-numbers-mode t) ;Adds line numbers to buffers by default.
+
+;;; Disables line numbers in listed modes
+(dolist (mode '(pdf-view-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                eww-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+end_src
+
+*** Starting Buffer
+#+begin_src emacs-lisp
+(setq-default initial-scratch-message nil) ; Removes default message from scratch buffer.
+(setq inhibit-startup-message t ; Disables default landing screen, scratch buffer used instead.
+      initial-buffer-choice "~/Neuromancer/splash.org") ; Creates custom landing buffer.
+#+end_src
+
+*** User Information
+#+begin_src emacs-lisp
+(setq calendar-latitude 42.33
+      calendar-longitude -83.04
+      calendar-location-name "Detroit,MI"
+      user-full-name "Que Fanning"
+      user-real-login-name "Que Fanning"
+      user-login-name "Que"
+      user-mail-address "Que@ironshark.org")
+#+end_src
+
+** Global Behavior
+
+*** Back Up and History Management
+#+begin_src emacs-lisp
+;;; Local File Versioning
+(setq backup-directory-alist '(("." . "~/Neuromancer/Archive/Files/Emacs-Bak"))
+      undo-tree-history-directory-alist '(("." . "~/Neuromancer/Archive/Files/Undo-Tree"))
+      backup-by-copying t
+      version-control t
+      vc-make-backup-files t
+      kept-old-versions 5
+      kept-new-versions 20
+      delete-old-versions t
+      history-length t
+      history-delete-duplicates t
+      savehist-save-minibuffer-history 1
+      savehist-additional-variables
+        '(kill-ring
+          search-ring
+          regexp-search-ring))
+
+
+(setq tramp-backup-directory-alist backup-directory-alist
+      auto-save-file-name-transforms '((".*" "~/Neuromancer/Archive/Files/Emacs-Bak/Auto-Saves" t))
+      savehist-file "~/Neuromancer/Archive/Files/Emacs-Bak/Save-hist")
+
+(savehist-mode 1)
+
+;;; Custom File Declaration
+(setq custom-file "~/.config/emacs/custom.el")
+(load custom-file)
+
+;;; History and Message Buffer Tracking
+(setq history-delete-duplicates t
+      history-length            100 ; default is 30.
+      report-emacs-bug-no-explanations t
+      comint-prompt-read-only          t
+      uniquify-buffer-name-style       nil
+      register-preview-delay           nil
+      message-log-max                  1000
+      kill-ring-max                    100
+      mark-ring-max                    100
+      global-mark-ring-max             200)
+#+end_src
+*** Line Management
+
+#+begin_src emacs-lisp
+(global-visual-line-mode t) ;Enables visual line wrapping in buffers.
+(setq-default fill-column 80) ; Visual line wrap after 80 characters.
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)) ;adds visual line wrap indicator.
+
+;;; Remove trailing white space
+(add-hook 'before-save-hook #'whitespace-cleanup)
+(setq-default sentence-end-double-space nil)
+#+end_src
+#+end_src
+*** Buffer Interaction
+#+begin_src emacs-lisp
+;;; Automatically updates buffer if file chages on disk.
+(global-auto-revert-mode 1)
+
+;;; Changes yes or no mini-buffer prompts to y or n.
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;;; Follow Symlinks without prompting user.
+(setq vc-follow-symlinks t)
+#+end_src
+*** User Notifications
+
+**** General
+#+begin_src emacs-lisp
+(setq visible-bell t    ; Enables visual alert bell.
+      ring-bell-function 'ignore) ; Disable sound bell.
+
+#+end_src
+
+**** Helpful
+Improves Help messages.
+#+begin_src emacs-lisp
+(use-package helpful
+  :commands (helpful-callable helpful-variable helpful-command helpful-key)
+  :bind
+  ([remap describe-command] . helpful-command)
+  ([remap describe-key] . helpful-key))
+#+end_src
+
+**** Which Key
+Shows available key commands in mini-buffer after a configurable delay.
+#+begin_src emacs-lisp
+(use-package which-key
+  :diminish which-key-mode
+  :config
+  (which-key-mode)
+  (setq which-key-idle-delay 1))
+#+end_src
+
+* Text Editing
+
+** Modal Input
+
+*** General Key Bindings
+#+begin_src emacs-lisp
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(global-set-key (kbd "C-S-v") 'clipboard-yank)
+(global-set-key (kbd "C-S-c") 'clipboard-kill-ring-save)
+#+end_src
+
+*** Evil and Evil Collection
+Adds Vi style modal input.
+#+begin_src emacs-lisp
+(use-package evil
+  :init
+  (setq evil-want-integration t
+       evil-want-keybinding nil
+       evil-want-C-u-scroll t
+       evil-want-C-i-jump nil
+       evil-respect-visual-line-mode t
+       evil-undo-system 'undo-tree)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
+
+(use-package evil-collection)
+#+end_src
+
+*** Undo Tree
+Replaces the Default Undo System.
+#+begin_src emacs-lisp
+(use-package undo-tree)
+(global-undo-tree-mode 1)
+#+end_src
+
+*** General
+Chord focused keybinding management
+#+begin_src emacs-lisp
+(use-package general
+  :after evil
+  :config
+  (general-create-definer technonomicon/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (technonomicon/leader-keys
+    "t" '(:ignore t :which-key "toggles")))
+#+end_src
+
+*** Hydra
+Multi / Repeated input keybinding management.
+#+begin_src emacs-lisp
+(use-package hydra)
+
+;;; Functions to move between hydra's
+(defvar hydra-stack nil)
+
+(defun hydra-push (expr)
+  (push `(lambda () ,expr) hydra-stack))
+
+
+(defun hydra-pop ()
+  (interactive)
+  (let ((x (pop hydra-stack)))
+    (when x
+      (funcall x))))
+#+end_src
+
+** Parentheses
+
+*** General
+#+begin_src emacs-lisp
+;;; Highlight paren currently under point.
+(show-paren-mode t)
+#+end_src
+*** Rainbow Delimiters
+Adds a set of progressive colors to each pair of parentheses, and adds highlighting to an unbalanced pair.
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+#+end_src
+
+** Completion and Comparison
+
+*** Helm
+
+**** Helm Core
+#+begin_src emacs-lisp
+(use-package helm
+  :config
+  (require 'helm-config)
+  (helm-mode 1))
+
+;;; Helm Keybindings
+(global-set-key (kbd "M-x") #'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+(global-set-key (kbd "C-c h") #'helm-command-prefix)
+#+end_src
+
+**** Helm Swiper
+Replaces normal I-search with Swiper.
+#+begin_src emacs-lisp
+(use-package swiper-helm)
+(global-set-key (kbd "C-s") 'swiper-helm)
+(global-set-key (kbd "C-M-s") 'helm-regexp)
+#+end_src
+
+*** Company
+
+**** Company Mode
+#+begin_src emacs-lisp
+(use-package company
+  :bind (("C-c ." . company-complete)))
+
+(setq company-tooltip-limit 10
+      company-show-numbers t
+      company-idle-delay 0.3
+      company-echo-delay 0)
+
+;;; Disable Company Mode in listed modes.
+(dolist (mode '(term-mode-hook
+                shell-mode-hook
+                eww-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (company-mode 0))))
+#+end_src
+
+**** Company Fuzzy
+Allows fuzzy matching with company.
+#+begin_src emacs-lisp
+(use-package company-fuzzy
+  :hook (company-mode . company-fuzzy-mode))
+
+(global-company-fuzzy-mode 1)
+#+end_src
+
+*** FlySpell
+#+begin_src emacs-lisp
+(dolist (hook '(text-mode-hook))
+  (add-hook hook (lambda ()
+                  ; (setq ispell-program-name "~/.guix-profile/bin/hunspell")
+                   (flyspell-mode 1))))
+#+end_src
+
+** Language Modes
+
+*** Org
+
+**** Visual Configuration
+
+***** Visual Fill Column
+#+begin_src emacs-lisp
+(defun technonomicon/org-mode-visual-fill ()
+  (setq visual-fill-column-width 100
+               visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :hook (org-mode . technonomicon/org-mode-visual-fill))
+#+end_src
+
+***** Org Bullets
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+#+end_src
+
+***** Indentations and Autofill
+#+begin_src emacs-lisp
+(defun technonomicon/org-mode-setup ()
+  (org-indent-mode 1)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (display-line-numbers-mode 0)
+  (setq evil-auto-indent nil
+        org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0))
+#+end_src
+
+***** Fonts
+
+****** Custom Org Function
+#+begin_src emacs-lisp
+(defun technonomicon/org-font-setup ()
+
+
+(font-lock-add-keywords 'org-mode
+                        '(("^*\\([-])\\) "
+                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+#+end_src
+
+****** Sub-heading Size
+#+begin_src emacs-lisp
+(dolist (face '((org-level-1 . 1.2)
+                      (org-level-2 . 1.1)
+                      (org-level-3 . 1.05)
+                      (org-level-4 . 1.0)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :font "Fira Sans" :weight 'regular :height (cdr face)))
+#+end_src
+
+****** Pitch
+#+begin_src emacs-lisp
+
+  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+#+end_src
+
+****** Display Emphasis Characters when Under Point
+#+begin_src emacs-lisp
+(use-package org-appear)
+(add-hook 'org-mode-hook 'org-appear-mode)
+
+;; Integrates org-appear with Evil Mode
+(setq org-appear-trigger 'manual)
+(add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start)
+(add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop)
+#+end_src
+
+**** Org Core
+#+begin_src emacs-lisp
+(use-package org
+  :hook (org-mode . technonomicon/org-mode-setup)
+        (org-mode . technonomicon/org-font-setup)
+        (before-save . Tn/org-set-last-modified)
+  :config
+  (setq org-ellipsis " ▾"
+        org-hide-emphasis-markers t
+        org-src-fontify-natively t
+        org-fontify-quote-and-verse-blocks t
+        org-src-tab-acts-natively t
+        org-edit-src-content-indentation 2
+        org-hide-block-startup nil
+        org-src-preserve-indentation nil
+        org-startup-folded 'content
+        org-cycle-separator-lines 2
+        org-confirm-babel-evaluate nil
+        org-capture-bookmark nil)
+
+(evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
+(evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
+
+(evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+(evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (lisp . t)
+   (latex . t)
+   (scheme . t)))
+;;; add (ledger .t) once leger cli is installed.
+
+(push '("conf-unix" . conf-unix) org-src-lang-modes))
+#+end_src
+
+**** Behavior Configuration
+
+***** Org Tempo
+Creates templates for SRC block tab expansion.
+#+begin_src emacs-lisp
+(require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+#+end_src
+
+***** Automatic Timestamp on Save
+#+begin_src emacs-lisp
+  (defun Tn/org-find-time-file-property (property &optional anywhere)
+    "Return the position of the time file PROPERTY if it exists.
+When ANYWHERE is non-nil, search beyond the preamble."
+    (save-excursion
+      (goto-char (point-min))
+      (let ((first-heading
+             (save-excursion
+               (re-search-forward org-outline-regexp-bol nil t))))
+        (when (re-search-forward (format "^#\\+%s:" property)
+                                 (if anywhere nil first-heading)
+                                 t)
+          (point)))))
+
+  (defun Tn/org-has-time-file-property-p (property &optional anywhere)
+    "Return the position of time file PROPERTY if it is defined.
+As a special case, return -1 if the time file PROPERTY exists but
+is not defined."
+    (when-let ((pos (Tn/org-find-time-file-property property anywhere)))
+      (save-excursion
+        (goto-char pos)
+        (if (and (looking-at-p " ")
+                 (progn (forward-char)
+                        (org-at-timestamp-p 'lax)))
+            pos
+          -1))))
+
+  (defun Tn/org-set-time-file-property (property &optional anywhere pos)
+    "Set the time file PROPERTY in the preamble.
+When ANYWHERE is non-nil, search beyond the preamble.
+If the position of the file PROPERTY has already been computed,
+it can be passed in POS."
+    (when-let ((pos (or pos
+                        (Tn/org-find-time-file-property property))))
+      (save-excursion
+        (goto-char pos)
+        (if (looking-at-p " ")
+            (forward-char)
+          (insert " "))
+        (delete-region (point) (line-end-position))
+        (let* ((now (format-time-string "[%Y-%m-%d %a %H:%M]")))
+          (insert now)))))
+
+  (defun Tn/org-set-last-modified ()
+    "Update the LAST_MODIFIED file property in the preamble."
+    (when (derived-mode-p 'org-mode)
+      (Tn/org-set-time-file-property "LAST_MODIFIED")))
+#+end_src
+
+*** LaTeX
+
+**** LaTeX Engine
+#+begin_src emacs-lisp
+(use-package tex
+  :straight auctex)
+
+(setq latex-run-command "xelatex"
+      org-latex-compiler "xelatex")
+#+end_src
+
+**** LaTeX Preview Pane
+#+begin_src emacs-lisp
+(use-package latex-preview-pane)
+#+end_src
+
+*** LISP
+
+**** SLIME
+#+begin_src emacs-lisp
+(use-package slime)
+
+(setq inferior-lisp-program "sbcl")
+#+end_src
+
+*** Nix
+#+begin_src emacs-lisp
+(use-package nix-mode
+  :mode "\\.nix\\'")
+#+end_src
+
+*** LLVM
+https://github.com/llvm-mirror/llvm
+
+* Knowledge Management
+
+** Bibtex Management
+
+*** Org Bibtex
+#+begin_src emacs-lisp
+(setq bibtex-user-optional-fields '(("keywords" "Search keywords" "")
+                                    ("file" "Link to source file" "")
+                                    ("Summary" "Summary of source" ":"))
+      bibtex-align-at-equal-sign t
+      bibtex-dialect 'biblatex
+      bibtex-maintain-sorted-entries t
+      bibtex-autokey-edit-before-use t
+      bibtex-autokey-before-presentation-hook t
+      bibtex-autokey-year-length 4
+      bibtex-completion-bibliography '("~/Neuromancer/Grimoire/Files/Globals/Bibliography.bib"))
+
+(defun bibtex-global-view ()
+"Opens global bibliography file"
+  (interactive)
+  (find-file "~/Neuromancer/Grimoire/Files/Globals/Bibliography.bib"))
+
+(define-key org-mode-map (kbd "C-c B") #'bibtex-global-view)
+#+end_src
+
+*** Helm Bibtex
+#+begin_src emacs-lisp
+(use-package helm-bibtex)
+
+(setq bibtex-completion-bibliography '("~/Neuromancer/Grimoire/Files/Globals/Bibliography.bib")
+      bibtex-completion-library-path '("~/Library")
+      bibtex-completion-pdf-field "file"
+      bibtex-completion-notes-path "~/Neuromancer/Grimoire/Nodes/References"
+      bibtex-completion-additional-search-fields '(keywords)
+      bibtex-completion-pdf-symbol "⌘"
+      bibtex-completion-notes-symbol "✎"
+      bibtex-completion-pdf-extension '(".pdf" ".djvu" ".jpg")) ;add extensions as needed.
+
+(require 'helm-config)
+
+(define-key helm-command-map "b" 'helm-bibtex)
+(define-key helm-command-map "B" 'helm-bibtex-with-local-bibliography)
+(define-key helm-command-map "n" 'helm-bibtex-with-notes)
+(define-key helm-command-map (kbd "<menu>") 'helm-resume)
+#+end_src
+
+*** Org Roam Bibtex
+#+begin_src emacs-lisp
+(use-package org-roam-bibtex
+  :after org-roam
+  :config
+  (require 'org-ref)
+  (org-roam-bibtex-mode 1)
+  (setq orb-preformat-keywords '("citekey" "author" "date")))
+#+end_src
+
+*** Org Ref
+#+begin_src emacs-lisp
+(use-package org-ref
+  :after helm-bibtex ; Initializes org-ref after helm-bibtex has loaded
+  :init
+  (require 'bibtex) ; Requires bibtex org sub-module
+  (setq bibtex-autokey-year-length 4
+        bibtex-autokey-name-year-separator "-"
+        bibtex-autokey-year-title-separator "-"
+        bibtex-autokey-titleword-separator "-"
+        bibtex-autokey-titlewords 2
+        bibtex-autokey-titlewords-stretch 1
+        bibtex-autokey-titleword-lenght 5
+        bibtex-dialect 'biblatex
+        bibtex-completion-bibliography '("~/Neuromancer/Grimoire/Files/Globals/Bibliography.bib"))
+  (require 'org-ref-helm)
+  (setq org-ref-insert-link-function 'org-ref-link-hydra/body
+        org-ref-insert-cite-function 'org-ref-cite-insert-helm
+        org-ref-insert-label-function 'org-ref-insert-label-link
+        org-ref-insert-ref-function 'org-ref-insert-ref-link
+           org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
+
+(define-key org-mode-map (kbd "C-c b") 'org-ref-insert-link-hydra/body)
+#+end_src
+
+** Files Management
+
+*** Org Roam
+**** General
+#+begin_src emacs-lisp
+(use-package org-roam
+  :init
+  (setq org-roam-v2-ack t)
+  ;; (require 'org-roam-protocol)
+  :custom
+        (org-roam-db-update-on-save t) ; May need to be disable for performance
+        (org-roam-completion-everywhere t)
+        (org-roam-directory "~/Neuromancer/Grimoire/Nodes")
+        (org-roam-dailies-directory "Journal")
+        (org-roam-dailes-capture-templates
+        '(("j" "Journal" plain
+           (file "~/Neuromancer/Grimoire/Files/Templates/journal-default.org")
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)))
+
+       (org-roam-capture-templates
+       '(("l" "Literature Note Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/litterature-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("r" "Reference Summary" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/reference-default.org")
+          :if-new (file+head "References/${citekey}.org" "#+title: ${title}\n")
+          :unarrowed t)
+
+         ("s" "Zettle Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/zettle-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("i" "Index Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/index-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("v" "Void Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/void-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("n" "Noun Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/noun-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("f" "File Default" plain
+          (file "~/Neuromancer/Grimoire/Files/Templates/file-default.org")
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("d" "Default" plain
+          "%?"
+          :if-new (file+head "General/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)))
+
+  :config
+       (org-roam-db-autosync-mode)
+       (org-roam-setup))
+#+end_src
+
+**** Display Format
+#+begin_src emacs-lisp
+(add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-direction)
+               (direction . right)
+               (window-width . 0.33)
+               (window-height . fit-window-to-buffer)))
+
+(setq org-roam-node-dispaly-template (concat "${title:*} " (propertize "${tags:10" 'face 'org-tag)))
+
+;;; Set sub-dirctory for Roam Journal entries
+(setq org-roam-dailies-directory "Journal")
+#+end_src
+
+**** Roam Key Maps
+
+***** General
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-c n") 'Tn/org-roam-menu-hydra/body)
+
+(defhydra Tn/org-roam-menu-hydra (:color teal :hint nil)
+  "
+ ^Search^          ^Insert^            ^Utilities^
+------------------------------------------------------------------
+_a_: Find         _I_: Insert         _b_: Roam Buffer
+_f_: Find Map     _l_: Insert L-Void  _g_: Roam Graph
+_d_: Journal Map  _i_: Insert Map     _m_: Roam Meta-Data
+------------------------------------------------------------------
+_k_: Org Capture  _c_: Roam Capture   _j_: Journal Capture
+"
+  ("j" org-roam-dailies-capture-today)
+  ("b" org-roam-buffer-toggle)
+  ("a" org-roam-node-find)
+  ("g" org-roam-graph)
+  ("I" org-roam-node-insert)
+  ("c" org-roam-capture)
+  ("l" insert-void-tag)
+  ("k" org-capture)
+  ("m" (progn
+         (Tn/org-roam-meta-data-hydra/body)
+         (hydra-push '(Tn/org-roam-menu-hydra/body))))
+  ("f" (progn
+         (Tn/org-roam-search-hydra/body)
+         (hydra-push '(Tn/org-roam-menu-hydra/body))))
+  ("i" (progn
+         (Tn/org-roam-insert-hydra/body)
+         (hydra-push '(Tn/org-roam-menu-hydra/body))))
+  ("d" (progn
+         (Tn/org-roam-journal-hydra/body)
+         (hydra-push '(Tn/org-roam-menu-hydra/body))))
+  ("ESC" nil "cancel"))
+
+#+end_src
+
+***** Meta-Data
+#+begin_src emacs-lisp
+(defhydra Tn/org-roam-meta-data-hydra (:color teal :hint nil)
+  "
+^Tags^            ^Alias^          ^Refernce-Keys^
+^^^^^^^^-----------------------------------------------------------
+_t_: add          _a_: Add         _r_: Add
+_T_: Remove       _A_: Remove      _R_: Remove
+"
+  ("t" org-roam-tag-add)
+  ("T" org-roam-tag-remove)
+  ("a" org-roam-alias-add)
+  ("A" org-roam-alias-remove)
+  ("r" org-roam-ref-add)
+  ("R" org-roam-ref-remove)
+  ("ESC" nil "cancel"))
+#+end_src
+
+***** Search
+#+begin_src emacs-lisp
+(defhydra Tn/org-roam-search-hydra (:color teal :hint nil)
+  "
+                ^Search Keys^
+----------------------------------------------------------------
+_c_: Core        _r_: Reference        _f_: File
+_n_: Noun        _l_: Litterature      _v_: Void
+       _d_: Default           _i_: Index
+"
+  ("c" find-core-tag)
+  ("l" find-litterature-tag)
+  ("r" find-reference-tag)
+  ("n" find-noun-tag)
+  ("i" find-index-tag)
+  ("d" org-roam-node-find)
+  ("v" find-void-tag)
+  ("f" find-file-tag)
+  ("n" org-roam-node-find)
+  ("ESC" nil "cancel"))
+#+end_src
+
+****** Custom Search Functions
+
+******* Core
+#+begin_src emacs-lisp
+(defun core-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "core" tags)))
+
+(defun find-core-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'core-search))
+#+end_src
+
+******* Litterature
+#+begin_src emacs-lisp
+(defun litterature-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "lit" tags)))
+
+(defun find-litterature-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'litterature-search))
+#+end_src
+
+******* Reference
+#+begin_src emacs-lisp
+(defun reference-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "ref" tags)))
+
+(defun find-reference-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'reference-search))
+#+end_src
+
+******* Person/Place/Thing
+#+begin_src emacs-lisp
+(defun noun-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "noun" tags)))
+
+(defun find-noun-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'noun-search))
+#+end_src
+
+******* Index
+#+begin_src emacs-lisp
+(defun index-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "index" tags)))
+
+(defun find-index-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'index-search))
+#+end_src
+
+******* Void
+#+begin_src emacs-lisp
+(defun void-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "void" tags)))
+
+(defun find-void-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'void-search))
+#+end_src
+
+******* File
+#+begin_src emacs-lisp
+(defun file-search (node)
+  (interactive)
+  (let ((tags (org-roam-node-tags node)))
+    (member "file" tags)))
+
+(defun find-file-tag ()
+  (interactive)
+  (org-roam-node-find t nil 'file-search))
+#+end_src
+
+***** Insert
+#+begin_src emacs-lisp
+(defhydra Tn/org-roam-insert-hydra (:color teal :hint nil)
+  "
+                ^Insert Keys^
+------------------------------------------------------------
+_c_: Core         _v_: Lit Void    _n_: Noun
+_d_: Default      _r_: Referrence  _l_: Litterature
+                  _i_: Index
+"
+  ("c" insert-core-tag)
+  ("v" insert-void-tag)
+  ("l" insert-litterature-tag)
+  ("r" insert-referrence-tag)
+  ("n" insert-noun-tag)
+  ("i" insert-index-tag)
+  ("d" org-roam-node-insert)
+  ("ESC" nil "cancel"))
+#+end_src
+
+****** Custom Insert Functions
+
+******* Core
+#+begin_src emacs-lisp
+(defun insert-core-tag ()
+  (interactive)
+  (org-roam-node-insert 'core-search))
+#+end_src
+
+******* Void
+#+begin_src emacs-lisp
+(defun insert-void-tag ()
+  (interactive)
+  (org-roam-node-insert 'void-search))
+#+end_src
+
+******* Litterature
+#+begin_src emacs-lisp
+(defun insert-litterature-tag ()
+  (interactive)
+  (org-roam-node-insert 'litterature-search))
+#+end_src
+
+******* Referrence
+#+begin_src emacs-lisp
+(defun insert-referrence-tag ()
+  (interactive)
+  (org-roam-node-insert 'referrence-search))
+#+end_src
+
+******* Noun
+#+begin_src emacs-lisp
+(defun insert-noun-tag ()
+  (interactive)
+  (org-roam-node-insert 'noun-search))
+#+end_src
+
+******* Index
+#+begin_src emacs-lisp
+(defun insert-index-tag ()
+  (interactive)
+  (org-roam-node-insert 'index-search))
+#+end_src
+
+***** Journal
+#+begin_src emacs-lisp
+(defhydra Tn/org-roam-journal-hydra (:color teal :hint nil)
+  "
+             ^Goto^                    ^Capture^
+---------------------------------------------------------------
+_n_: Tomorrow     _j_: Today         _t_: Tomorrow
+_p_: Yesterday    _d_: Date          _y_: Yesterday
+"
+  ("j" org-roam-dailies-goto-today)
+  ("n" org-roam-dailies-goto-tomorrow)
+  ("p" org-roam-dailies-goto-yesterday)
+  ("d" org-roam-dailies-goto-date)
+  ("t" org-roam-dailies-capture-tomorrow)
+  ("y" org-roam-dailies-capture-yesterday)
+  ("ESC" nil "cancel"))
+#+end_src
+
+*** Org Flash Cards
+#+begin_src emacs-lisp
+(use-package org-fc
+  :straight
+  (org-fc
+   :type git :repo "https://git.sr.ht/~l3kn/org-fc"
+   :files (:defaults "awk" "demo.org"))
+  :custom
+  (org-fc-directories '("~/Neuromancer/Grimoire/Nodes/"
+                        "~/Neuromancer/Grimoire/Files/"
+                        "~/Projects"))
+  :config
+  (require 'org-fc-hydra))
+
+(global-set-key (kbd "C-c f") 'org-fc-hydra/body)
+
+(evil-define-minor-mode-key '(normal insert emacs) 'org-fc-review-flip-mode
+  (kbd "RET") 'org-fc-review-flip
+  (kbd "n") 'org-fc-review-flip
+  (kbd "s") 'org-fc-review-suspend-card
+  (kbd "q") 'org-fc-review-quit)
+
+(evil-define-minor-mode-key '(normal insert emacs) 'org-fc-review-rate-mode
+  (kbd "a") 'org-fc-review-rate-again
+  (kbd "h") 'org-fc-review-rate-hard
+  (kbd "g") 'org-fc-review-rate-good
+  (kbd "e") 'org-fc-review-rate-easy
+  (kbd "s") 'org-fc-review-rate-suspend-card
+  (kbd "q") 'org-fc-review-quit)
+#+end_src
+
+*** Org Transclusion
+#+begin_src emacs-lisp
+(use-package org-transclusion
+  :after org)
+(define-key org-mode-map (kbd "<f12>") #'org-transclusion-add)
+#+end_src
+
+*** PDF Management
+
+**** Org PDF Viewer
+#+begin_src emacs-lisp
+(use-package org-pdfview
+  :config
+  (add-to-list 'org-file-apps
+               '("\\.pdf\\'" . (lambda (file link)
+                                 (org-pdfview-open-link)))))
+#+end_src
+
+**** PDF Tools
+An improved PDF reader with Vi style controls.
+#+begin_src emacs-lisp
+(use-package pdf-tools
+  :defer t
+  :pin manual
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-width)
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+:bind (:map pdf-view-mode-map
+              ("s" . pdf-occur)
+              ("g" . pdf-view-first-page)
+              ("G" . pdf-view-last-page)
+              ("j" . pdf-view-next-page)
+              ("k" . pdf-view-previous-page)
+              ("e" . pdf-view-goto-page)
+              ("u" . pdf-view-revert-buffer)
+              ("y" . pdf-view-kill-ring-save)
+              ("m" . pdf-misc-display-metadata)
+              ("b" . pdf-view-set-slice-from-bounding-box)
+              ("r" . pdf-view-reset-slice)
+              ("ad" . pdf-annot-delete)
+              ("aa" . pdf-annot-attachment-dired)
+              ("<s-spc>" . pdf-view-scroll-down-or-next-page))
+:custom
+(pdf-annot-activate-created-annotations t "automatically annotate highlights")
+(pdf-view-active-region nil))
+
+(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+      TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
+      TeX-source-correlate-start-server t)
+
+(add-hook 'TeX-after-compilation-finished-functions
+          #'TeX-revert-document-buffer)
+
+(add-hook 'pdf-view-mode-hook (lambda() (linum-mode -1)))
+
+(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode)
+#+end_src
+
+** Publishing and Export
+*** Ox Haunt
+Exports to Haunt static site generator
+#+begin_src emacs-lisp
+(use-package ox-haunt)
+(with-eval-after-load 'ox
+  (require 'ox-haunt))
+#+end_src
+
+* Project Management
+
+** Magit
+#+begin_src emacs-lisp
+(use-package magit)
+
+(global-set-key (kbd "C-c g") 'magit-status)
+#+end_src
+
+** Evil-Magit
+#+begin_src emacs-lisp
+(use-package evil-magit)
+#+end_src
+
+** Git-Gutter
+#+begin_src emacs-lisp
+(use-package git-gutter)
+
+(custom-set-variables
+ '(git-gutter:modified-sign "~")) ;; two space
+
+(set-face-foreground 'git-gutter:modified "deep sky blue") ;; background color
+(set-face-foreground 'git-gutter:added "green")
+(set-face-foreground 'git-gutter:deleted "red")
+
+(global-set-key (kbd "C-c G") 'git-gutter-mode)
+#+end_src
+
+
+** Projectile
+#+begin_src emacs-lisp
+(use-package projectile
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
+
+(setq  projectile-project-search-path '("~/Projects" "~/Technonomicon"))
+#+end_src
+
+* Infrastructure
+Packages and setting that support other packages.
+
+** Async
+Enables limited multi-threading in Emacs.
+#+begin_src emacs-lisp
+(use-package async)
+#+end_src
+
+** Dired Async
+Enables certian terminal commands to be preformed asyncronously
+#+begin_src emacs-lisp
+(use-package dired-async
+  :straight async
+  :diminish (dired-async-mode)
+  :init (setq dired-async-message-function #'message)
+  (with-eval-after-load 'dired (dired-async-mode)))
+
+(dired-async-mode 1)
+#+end_src
