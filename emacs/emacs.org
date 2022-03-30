@@ -1,11 +1,7 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
 #+Author: Que Fanning
 #+Title: Emacs Literate Configuration
-<<<<<<< HEAD
-#+LAST_MODIFIED: [2022-03-25 Fri 16:41]
-=======
-#+LAST_MODIFIED: [2022-03-20 Sun 19:36]
->>>>>>> origin/main
+#+LAST_MODIFIED: [2022-03-29 Tue 18:56]
 
 * Package Management
 ** Warning Message
@@ -778,7 +774,7 @@ https://github.com/llvm-mirror/llvm
         (org-roam-directory "~/Neuromancer/Grimoire/Nodes")
         (org-roam-dailies-directory "Journal")
         (org-roam-dailes-capture-templates
-        '(("j" "Journal" plain
+        '(("j" "Journal" entry
            (file "~/Neuromancer/Grimoire/Files/Templates/journal-default.org")
            :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
            :unnarrowed t)))
@@ -854,15 +850,15 @@ https://github.com/llvm-mirror/llvm
   "
  ^Search^          ^Insert^            ^Utilities^
 ------------------------------------------------------------------
-_a_: Find         _I_: Insert         _b_: Roam Buffer
-_f_: Find Map     _l_: Insert L-Void  _g_: Roam Graph
+_f_: Find         _I_: Insert         _b_: Roam Buffer
+_F_: Find Map     _l_: Insert L-Void  _g_: Roam Graph
 _d_: Journal Map  _i_: Insert Map     _m_: Roam Meta-Data
 ------------------------------------------------------------------
 _k_: Org Capture  _c_: Roam Capture   _j_: Journal Capture
 "
   ("j" org-roam-dailies-capture-today)
   ("b" org-roam-buffer-toggle)
-  ("a" org-roam-node-find)
+  ("f" org-roam-node-find)
   ("g" org-roam-graph)
   ("I" org-roam-node-insert)
   ("c" org-roam-capture)
@@ -871,7 +867,7 @@ _k_: Org Capture  _c_: Roam Capture   _j_: Journal Capture
   ("m" (progn
          (Tn/org-roam-meta-data-hydra/body)
          (hydra-push '(Tn/org-roam-menu-hydra/body))))
-  ("f" (progn
+  ("F" (progn
          (Tn/org-roam-search-hydra/body)
          (hydra-push '(Tn/org-roam-menu-hydra/body))))
   ("i" (progn
@@ -881,7 +877,6 @@ _k_: Org Capture  _c_: Roam Capture   _j_: Journal Capture
          (Tn/org-roam-journal-hydra/body)
          (hydra-push '(Tn/org-roam-menu-hydra/body))))
   ("ESC" nil "cancel"))
-
 #+end_src
 
 ***** Meta-Data
@@ -1083,13 +1078,17 @@ _d_: Default      _r_: Referrence  _l_: Litterature
 _n_: Tomorrow     _j_: Today         _t_: Tomorrow
 _p_: Yesterday    _d_: Date          _y_: Yesterday
 "
-  ("j" org-roam-dailies-goto-today)
+  ("j" Tn/org-roam-dailies-goto-today)
   ("n" org-roam-dailies-goto-tomorrow)
   ("p" org-roam-dailies-goto-yesterday)
   ("d" org-roam-dailies-goto-date)
   ("t" org-roam-dailies-capture-tomorrow)
   ("y" org-roam-dailies-capture-yesterday)
   ("ESC" nil "cancel"))
+
+(defun Tn/org-roam-dailies-goto-today ()
+  (interactive)
+  (org-roam-dailies-goto-today "j"))
 #+end_src
 
 *** Org Flash Cards
@@ -1218,7 +1217,6 @@ Exports to Haunt static site generator
 
 (global-set-key (kbd "C-c G") 'git-gutter-mode)
 #+end_src
-
 
 ** Projectile
 #+begin_src emacs-lisp
