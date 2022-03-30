@@ -1,9 +1,7 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el
 #+Author: Que Fanning
 #+Title: Emacs Literate Configuration
-#+LAST_MODIFIED: [2022-03-30 Wed 10:03]
-
-test test test
+#+LAST_MODIFIED: [2022-03-30 Wed 10:04]
 
 * Package Management
 ** Warning Message
